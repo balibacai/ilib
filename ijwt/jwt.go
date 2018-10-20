@@ -1,8 +1,8 @@
-package jwt
+package ijwt
 
 import (
 	"crypto/rsa"
-	rawJWT "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 )
 
@@ -33,9 +33,9 @@ func (j *JWT) SetSecret(secret string) {
 	j.Secret = []byte(secret)
 }
 
-func (j *JWT) ParseWithClaims(tokenString string, claims rawJWT.Claims) (*rawJWT.Token, error) {
+func (j *JWT) ParseWithClaims(tokenString string, claims jwt.Claims) (*jwt.Token, error) {
 	// parse token with claims
-	token, err := rawJWT.ParseWithClaims(tokenString, claims, func(token *rawJWT.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return j.Secret, nil
 	})
 
@@ -43,7 +43,7 @@ func (j *JWT) ParseWithClaims(tokenString string, claims rawJWT.Claims) (*rawJWT
 }
 
 func (j *RSAJWT) SetPrivateKey(pem []byte) {
-	privateKey, err := rawJWT.ParseRSAPrivateKeyFromPEM(pem)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(pem)
 	if err != nil {
 		panic(err)
 	}
@@ -51,30 +51,30 @@ func (j *RSAJWT) SetPrivateKey(pem []byte) {
 }
 
 func (j *RSAJWT) SetPublicKey(pem []byte) {
-	publicKey, err := rawJWT.ParseRSAPublicKeyFromPEM(pem)
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(pem)
 	if err != nil {
 		panic(err)
 	}
 	j.PublicKey = publicKey
 }
 
-func (j *RSAJWT) ParseWithClaims(tokenString string, claims rawJWT.Claims) (*rawJWT.Token, error) {
+func (j *RSAJWT) ParseWithClaims(tokenString string, claims jwt.Claims) (*jwt.Token, error) {
 	// parse token with claims
-	token, err := rawJWT.ParseWithClaims(tokenString, claims, func(token *rawJWT.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return j.PublicKey, nil
 	})
 
 	return token, err
 }
 
-func (j *RSAJWT) NewSignatureWithClaims(claims rawJWT.Claims) (string, error) {
-	token := rawJWT.NewWithClaims(rawJWT.SigningMethodRS256, claims)
+func (j *RSAJWT) NewSignatureWithClaims(claims jwt.Claims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	ss, err := token.SignedString(j.PrivateKey)
 	return ss, err
 }
 
-func (j *JWT) NewSignatureWithClaims(claims rawJWT.Claims) (string, error) {
-	token := rawJWT.NewWithClaims(rawJWT.SigningMethodHS256, claims)
+func (j *JWT) NewSignatureWithClaims(claims jwt.Claims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString(j.Secret)
 
 	return ss, err
@@ -106,7 +106,7 @@ func SetJWTPrivateKey(path string) {
 	myRSAJwt.SetPrivateKey(pemBytes)
 }
 
-func ParseJWTTokenWithClaims(tokenString string, claims rawJWT.Claims) (*rawJWT.Token, error) {
+func ParseJWTTokenWithClaims(tokenString string, claims jwt.Claims) (*jwt.Token, error) {
 	if mode == JWTSecretMode {
 		return myJwt.ParseWithClaims(tokenString, claims)
 	} else if mode == JWTRSAMode {
@@ -116,7 +116,7 @@ func ParseJWTTokenWithClaims(tokenString string, claims rawJWT.Claims) (*rawJWT.
 	}
 }
 
-func NewJWTTokenStringWithClaims(claims rawJWT.Claims) (string, error) {
+func NewJWTTokenStringWithClaims(claims jwt.Claims) (string, error) {
 	if mode == JWTSecretMode {
 		return myJwt.NewSignatureWithClaims(claims)
 	} else if mode == JWTRSAMode {

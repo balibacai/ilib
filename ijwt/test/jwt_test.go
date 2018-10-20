@@ -4,33 +4,33 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	rawJWT "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"time"
-	"ilib/jwt"
+	"ilib/ijwt"
 )
 
 func init() {
-	jwt.SetJWTSecret("123")
-	jwt.SetJWTPrivateKey("rsaprivatekey.pem")
-	jwt.SetJWTPublicKey("rsapublickey.pem")
+	ijwt.SetJWTSecret("123")
+	ijwt.SetJWTPrivateKey("rsaprivatekey.pem")
+	ijwt.SetJWTPublicKey("rsapublickey.pem")
 }
 
 type LoginClaims struct {
 	UserID int64
-	rawJWT.StandardClaims
+	jwt.StandardClaims
 }
 
 // TestGet is a sample to run an endpoint test
 func TestJWTBuildAndParseToken(t *testing.T) {
-	jwt.SetJWTMode(jwt.JWTSecretMode)
+	ijwt.SetJWTMode(ijwt.JWTSecretMode)
 
 	now := time.Now()
 	userID := int64(1234567)
 	expiredAt := now.Unix() + 3600
 
-	tokenString, err := jwt.NewJWTTokenStringWithClaims(LoginClaims{
+	tokenString, err := ijwt.NewJWTTokenStringWithClaims(LoginClaims{
 		userID,
-		rawJWT.StandardClaims {
+		jwt.StandardClaims {
 			ExpiresAt: expiredAt,
 			Issuer: "test",
 		},
@@ -42,7 +42,7 @@ func TestJWTBuildAndParseToken(t *testing.T) {
 
 
 	// parse token with claims
-	token, err := jwt.ParseJWTTokenWithClaims(tokenString, &LoginClaims{})
+	token, err := ijwt.ParseJWTTokenWithClaims(tokenString, &LoginClaims{})
 
 	Convey("parse err should be nil", t, func() {
 		So(err, ShouldBeNil)
@@ -62,15 +62,15 @@ func TestJWTBuildAndParseToken(t *testing.T) {
 }
 
 func TestRSAJWTBuildAndParseToken(t *testing.T) {
-	jwt.SetJWTMode(jwt.JWTRSAMode)
+	ijwt.SetJWTMode(ijwt.JWTRSAMode)
 
 	now := time.Now()
 	userID := int64(1234567)
 	expiredAt := now.Unix() + 3600
 
-	tokenString, err := jwt.NewJWTTokenStringWithClaims(LoginClaims{
+	tokenString, err := ijwt.NewJWTTokenStringWithClaims(LoginClaims{
 		userID,
-		rawJWT.StandardClaims {
+		jwt.StandardClaims {
 			ExpiresAt: expiredAt,
 			Issuer: "test",
 		},
@@ -83,7 +83,7 @@ func TestRSAJWTBuildAndParseToken(t *testing.T) {
 	//fmt.Printf(tokenString)
 
 	// parse token with claims
-	token, err := jwt.ParseJWTTokenWithClaims(tokenString, &LoginClaims{})
+	token, err := ijwt.ParseJWTTokenWithClaims(tokenString, &LoginClaims{})
 
 	Convey("parse err should be nil", t, func() {
 		So(err, ShouldBeNil)
